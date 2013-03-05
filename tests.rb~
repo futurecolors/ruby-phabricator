@@ -1,0 +1,11 @@
+#!/usr/bin/ruby
+
+require "phabricator"
+require "test/unit"
+
+class HelperFunctionsTest < Test::Unit::TestCase
+  def test_make_http_request_returns_same_results_for_lower_and_uppercase_method
+    res1 = make_http_request('get', 'http://www.google.com/', [])
+    res2 = make_http_request('GET', 'http://www.google.com/', [])
+    assert_equal(res1, res2)
+end
