@@ -15,7 +15,7 @@ def make_http_request(method, url, data={}, headers={})
     req = Net::HTTP::Post.new url.path, headers
     req.set_form_data data
   end
-#  req.basic_auth http_auth_user, http_auth_pwd
+  req.basic_auth url.user, url.password
   res = Net::HTTP.start(url.host, url.port) {|http|
     http.request(req)
   }
@@ -73,7 +73,7 @@ def get_auth_kwargs(username)
   token = "%.8f" % Time.now.to_f
   return {
     'authToken' => token,
-    'authSignat' => generate_hash(token, cert),
+    'authSignature' => generate_hash(token, cert),
     'user' => username,
   }
 end

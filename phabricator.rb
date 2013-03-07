@@ -2,6 +2,8 @@
 
 require_relative "wrapper"
 require 'json'
+require 'addressable/uri'
+
 
 def get_commit_status project_sid, commit_id
   commit_sid = get_commit_sid project_sid, commit_id
@@ -23,6 +25,4 @@ def get_commit_sid(project_sid, commit_id)
   return "r#{project_sid}#{commit_id}"
 end
 
-puts make_api_call(method_address='diffusion.getcommits',
-                   data={"commits" => ["rPATc58eef262b497647bdec510c2ca2dcbd15f9d4e5"]},
-                  )
+puts make_api_call 'diffusion.getcommits', {"commits" => ["rPATc58eef262b497647bdec510c2ca2dcbd15f9d4e5"]}
