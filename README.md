@@ -15,7 +15,7 @@ Phabricator API Wrapper for Ruby.
 
 In your code import `wrapper.rb` and use Phabricator API with `make_api_call` method. For example:
 ```ruby
-    commits = ["rPATc58eef262b497647bdec510c2ca2dcbd15f9d4e5",]
+    commits = ["rPRJc58eef262b497647bdec510c2ca2dcbd15f9d4e5",]
     commit_info = make_api_call 'diffusion.getcommits', {"commits" => commits}
     commit_message = commit_info['result'].values[0]['commitMessage']
     puts commit_message
@@ -27,5 +27,7 @@ In your code import `wrapper.rb` and use Phabricator API with `make_api_call` me
 ```
     $ cd /somewhere/ruby-phabricator/
     $ ruby ./phabricator.rb conduit.ping
-    $ ruby ./phabricator.rb --data='{"name": "PAT"}' arcanist.projectinfo
+    {"result"=>"dev", "error_code"=>nil, "error_info"=>nil}
+    $ ruby ./phabricator.rb --data='{"name": "PRJ"}' arcanist.projectinfo
+    {"result"=>nil, "error_code"=>"ERR-BAD-ARCANIST-PROJECT", "error_info"=>"No such project exists."}
 ```
