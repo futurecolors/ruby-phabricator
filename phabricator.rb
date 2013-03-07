@@ -1,22 +1,18 @@
 #!/usr/bin/ruby
 
-require_relative "helpers"
+require_relative "wrapper"
+require 'json'
 
-
-def get_commit_status(project_sid, commit_id)
-  auth_token = get_auth_token()
+def get_commit_status project_sid, commit_id
   commit_sid = get_commit_sid project_sid, commit_id
   commit_phid = get_commit_phid commit_sid
   commit_status = get_commit_status_by_phid commit_phid
   return commit_status
 end
 
-def get_auth_token()
-  return 'test_token'
-end
-
 def get_commit_phid(commit_sid)
-  return 'test_phid'
+  res = make_api_call 'diffusion.getcommits', data={"commits" => [commit_sid]}
+  return res['result'].values[0]['commitPHID']
 end
 
 def get_commit_status_by_phid(commit_phid)
@@ -27,4 +23,6 @@ def get_commit_sid(project_sid, commit_id)
   return "r#{project_sid}#{commit_id}"
 end
 
-puts get_commit_status 'prj', '123'
+puts make_api_call(method_address='diffusion.getcommits',
+                   data={"commits" => ["rPATc58eef262b497647bdec510c2ca2dcbd15f9d4e5"]},
+                  )
