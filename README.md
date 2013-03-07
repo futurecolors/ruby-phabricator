@@ -7,9 +7,11 @@ Phabricator API Wrapper for Ruby.
 
 1. [Install Phabricator Arcanist] (http://www.phabricator.com/docs/phabricator/article/Arcanist_User_Guide.html#installing-arcanist)
 2. Launch `arc install-certificate` and follow instructions. You must have `~/.arcrc` after this step.
-3. Clone this repo with `git clone git@github.com:Melevir/ruby-phabricator.git`
+3. Clone this repo with `$ git clone git@github.com:Melevir/ruby-phabricator.git`
 
 # Usage
+
+## In Ruby code
 
 In your code import `wrapper.rb` and use Phabricator API with `make_api_call` method. For example:
 ```ruby
@@ -17,4 +19,13 @@ In your code import `wrapper.rb` and use Phabricator API with `make_api_call` me
     commit_info = make_api_call 'diffusion.getcommits', {"commits" => commits}
     commit_message = commit_info['result'].values[0]['commitMessage']
     puts commit_message
+```
+
+## In bash
+
+`phabricator.rb` provides command-line interface to `make_api_call` method. Sample usage:
+```
+    $ cd /somewhere/ruby-phabricator/
+    $ ruby ./phabricator.rb conduit.ping
+    $ ruby ./phabricator.rb --data='{"name": "PAT"}' arcanist.projectinfo
 ```
