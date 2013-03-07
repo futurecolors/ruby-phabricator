@@ -5,9 +5,9 @@ Phabricator API Wrapper for Ruby.
 
 # Installation
 
-1. [Install Phabricator Arcanist] (http://www.phabricator.com/docs/phabricator/article/Arcanist_User_Guide.html#installing-arcanist)
+1. [Install Phabricator Arcanist] (http://www.phabricator.com/docs/phabricator/article/Arcanist_User_Guide.html#installing-arcanist).
 2. Launch `arc install-certificate` and follow instructions. You must have `~/.arcrc` after this step.
-3. Clone this repo with `$ git clone git@github.com:Melevir/ruby-phabricator.git`
+3. Clone this repo with `$ git clone git@github.com:Melevir/ruby-phabricator.git`.
 
 # Usage
 
@@ -31,3 +31,20 @@ In your code import `wrapper.rb` and use Phabricator API with `make_api_call` me
     $ ruby ./phabricator.rb --data='{"name": "PRJ"}' arcanist.projectinfo
     {"result"=>nil, "error_code"=>"ERR-BAD-ARCANIST-PROJECT", "error_info"=>"No such project exists."}
 ```
+
+# For contributors
+
+## Installing gems required for testing
+
+```
+gem install webmock
+gem install fakefs
+```
+
+* [Webmock](https://github.com/bblimke/webmock) used for mocking HTTP requests in tests.
+* [FakeFS](https://github.com/defunkt/fakefs) used for mocking FileSystem (`~/.arcrc` file).
+
+## Todo
+
+* Shortcut for getting status of list of commits in one request.
+* Handling error messages from API.
