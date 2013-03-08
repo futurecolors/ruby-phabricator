@@ -2,6 +2,7 @@ ruby-phabricator
 ================
 
 [![Build Status](https://travis-ci.org/Melevir/ruby-phabricator.png)](https://travis-ci.org/Melevir/ruby-phabricator)
+[![Coverage Status](https://coveralls.io/repos/Melevir/ruby-phabricator/badge.png?branch=master)](https://coveralls.io/r/Melevir/ruby-phabricator)
 
 Phabricator API Wrapper for Ruby.
 
