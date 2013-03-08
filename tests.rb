@@ -96,6 +96,6 @@ class ShortcutsFunctionsTest < FakeFSTestCase
     stub_request(:post, "#{host}diffusion.getcommits").to_return(:body => getcommits_data)
     stub_request(:post, "#{host}audit.query").to_return(:body => query_data)
     status = get_commit_status 'PRJ', '12345'
-    assert status.eql? 'accepted'
+    assert status.eql? ['accepted',]
   end
 end

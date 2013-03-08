@@ -5,9 +5,6 @@ require_relative "shortcuts"
 require 'optparse'
 require 'json'
 
-# puts get_commit_status 'PAT', 'd26e6e20'
-# puts get_commit_status 'PAT', '209a3ffa991169db6f273a3eedfb5f7ad735430b'
-
 options = {}
 
 optparse = OptionParser.new do |opts|
