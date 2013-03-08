@@ -1,4 +1,5 @@
-#!/usr/bin/ruby
+require 'coveralls'
+Coveralls.wear!('rails')
 
 require "test/unit"
 require 'webmock/test_unit'
@@ -6,11 +7,6 @@ require 'fakefs'
 require_relative "helpers"
 require_relative "wrapper"
 require_relative "shortcuts"
-
-require 'coveralls'
-
-Coveralls.wear!('rails')
-
 
 class FakeFSTestCase < Test::Unit::TestCase
 
