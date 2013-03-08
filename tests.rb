@@ -7,6 +7,10 @@ require_relative "helpers"
 require_relative "wrapper"
 require_relative "shortcuts"
 
+require 'coveralls'
+
+Coveralls.wear!('rails')
+
 
 class FakeFSTestCase < Test::Unit::TestCase
 
