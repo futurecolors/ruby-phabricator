@@ -1,6 +1,8 @@
 ruby-phabricator
 ================
 
+[![Build Status](https://travis-ci.org/Melevir/ruby-phabricator.png)](https://travis-ci.org/Melevir/ruby-phabricator)
+
 Phabricator API Wrapper for Ruby.
 
 # Installation
