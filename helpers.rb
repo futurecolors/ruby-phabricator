@@ -32,6 +32,9 @@ end
 
 def get_arc_settings(settings_file_name=nil)
   settings_file_name ||= File.expand_path("~/.arcrc")
+  if not File.file? settings_file_name
+    raise 'No ~/.arcrc file found'
+  end
   return JSON.parse(File.read settings_file_name)
 end
 
@@ -49,9 +52,9 @@ def check_arc_settings
   # Checks if .arcrc has hosts. If there are more than one host, shows message.
   settings = get_arc_settings
   if not settings.include? 'hosts'
-    puts "ERROR: Your .arcrc file has no info about host or doesn't exists. Install arc and run install-certificate."
+    raise "ERROR: Your .arcrc file has no info about host or doesn't exists. Install arc and run install-certificate."
   elsif settings['hosts'].keys.length > 1
-    puts "ERROR: Your .arcrc file has more than one host. Comment out hosts you don't need"
+    raise "ERROR: Your .arcrc file has more than one host. Comment out hosts you don't need"
   end
 end
 

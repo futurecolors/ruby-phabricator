@@ -4,10 +4,11 @@ Coveralls.wear!('rails')
 
 require "test/unit"
 require 'webmock/test_unit'
-require 'fakefs'
+require 'fakefs/safe'
 require_relative "helpers"
 require_relative "wrapper"
 require_relative "shortcuts"
+
 
 class FakeFSTestCase < Test::Unit::TestCase
 
@@ -19,14 +20,23 @@ class FakeFSTestCase < Test::Unit::TestCase
     end
   end
 
+  def remove_settings_file_if_exists
+    path = File.expand_path("~/.arcrc")
+    if File.file? path
+      File.delete path
+    end
+  end
+
   def setup
     FakeFS.activate!
+    remove_settings_file_if_exists
   end
 
   def teardown
     FakeFS.deactivate!
   end
 end
+
 
 class HelperFunctionsTest < FakeFSTestCase
 
@@ -60,6 +70,26 @@ class HelperFunctionsTest < FakeFSTestCase
     url = 'http://www.example.com/'
     stub_request(:get, url)
     make_get_request url
+  end
+
+  def test_check_arc_settings_raiss_error_when_no_hosts_in_arcrc_file
+    create_settings_file "{}"
+    assert_raise RuntimeError do
+      check_arc_settings
+    end
+  end
+
+  def test_check_arc_settings_raiss_error_when_more_than_one_host_in_arcrc_file
+    create_settings_file "{\"hosts\":{\"host1\":{},\"host2\":{}}}"
+    assert_raise RuntimeError do
+      check_arc_settings
+    end
+  end
+
+  def test_get_arc_settings_raises_error_when_no_file
+    assert_raise_message RuntimeError, 'No ~/.arcrc file found' do
+      get_arc_settings
+    end
   end
 
   def test_phabricator_request_body_has_required_args
