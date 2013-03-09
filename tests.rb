@@ -1,3 +1,4 @@
+# Turn on coveralls. Must be on top.
 require 'coveralls'
 Coveralls.wear!('rails')
 
@@ -29,12 +30,36 @@ end
 
 class HelperFunctionsTest < FakeFSTestCase
 
+  def assert_raise_message(types, matcher, message = nil, &block)
+    args = [types].flatten + [message]
+    exception = assert_raise(*args, &block)
+    assert_match matcher, exception.message, message
+  end
+
   def test_hash_generation_correct
     token = 'test_token'
     cert = 'test_cert'
     expected_hash = '1068245b9f827538620547a8d9cc0ce28450227c'
     actual_hash = generate_hash token, cert
     assert_equal actual_hash, expected_hash
+  end
+
+  def test_make_http_request_raises_error_on_wrong_method
+    assert_raise_message RuntimeError, 'Bad method' do
+      make_http_request 'put', 'http://example.com/'
+    end
+  end
+
+  def test_make_http_request_makes_get_requests
+    url = 'http://www.example.com/'
+    stub_request(:get, url)
+    make_http_request 'get', url
+  end
+
+  def test_make_http_request_makes_get_requests
+    url = 'http://www.example.com/'
+    stub_request(:get, url)
+    make_get_request url
   end
 
   def test_phabricator_request_body_has_required_args
