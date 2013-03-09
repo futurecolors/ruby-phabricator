@@ -37,17 +37,7 @@ In your code import `wrapper.rb` and use Phabricator API with `make_api_call` me
 
 # For contributors
 
-## Installing gems required for testing
-
-```
-gem install webmock
-gem install fakefs
-```
-
-* [Webmock](https://github.com/bblimke/webmock) used for mocking HTTP requests in tests.
-* [FakeFS](https://github.com/defunkt/fakefs) used for mocking FileSystem (`~/.arcrc` file).
-
 ## Todo
 
-* Shortcut for getting status of list of commits in one request.
 * Handling error messages from API.
+* More shortcut functions
