@@ -35,7 +35,7 @@ end
 def make_api_call(method_address, settings_file_name, data={}, auth_data=nil)
   # Sends request to Phabricator API and parses response.
   # Makes auth request if no auth_data provided.
-  check_arc_settings settings_file_name
+# check_arc_settings settings_file_name
   kwargs = auth_data || auth(get_username_from_arc_settings(settings_file_name), settings_file_name)
   kwargs.merge! data
   result_data = get_phabricator_request_body kwargs
