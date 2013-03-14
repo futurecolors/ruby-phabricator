@@ -1,7 +1,7 @@
 require_relative "wrapper"
 
 
-def get_commit_status project_sid, commit_sids, settings_file_name
+def get_commit_status project_sid, commit_ids, settings_file_name
   # Gets statuses of commits in given projects.
   # commit_ids can be list or single id.
   # Sample usage:
@@ -12,7 +12,7 @@ def get_commit_status project_sid, commit_sids, settings_file_name
   if not commit_ids.kind_of? Array
     commit_ids = [commit_ids]
   end
-# commit_sids = get_commit_sids project_sid, commit_ids
+  commit_sids = get_commit_sids project_sid, commit_ids
   commit_phids = get_commit_phids commit_sids, settings_file_name
   commit_statuses = get_commit_status_by_phids commit_phids[0], settings_file_name
   result = {}
