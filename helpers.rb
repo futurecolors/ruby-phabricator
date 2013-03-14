@@ -31,26 +31,26 @@ def make_post_request(url, data={}, headers={})
 end
 
 def get_arc_settings(settings_file_name=nil)
-  settings_file_name ||= File.expand_path("~/.arcrc")
+  settings_file_name ||= File.expand_path "~/.arcrc"
   if not File.file? settings_file_name
     raise 'No ~/.arcrc file found'
   end
   return JSON.parse(File.read settings_file_name)
 end
 
-def get_username_from_arc_settings
-  settings = get_arc_settings
+def get_username_from_arc_settings(settings_file_name=nil)
+  settings = get_arc_settings settings_file_name
   return settings['hosts'].values[0]['user']
 end
 
-def get_host_from_arc_settings
-  settings = get_arc_settings
+def get_host_from_arc_settings(settings_file_name=nil)
+  settings = get_arc_settings settings_file_name
   return settings['hosts'].keys[0]
 end
 
-def check_arc_settings
+def check_arc_settings(settings_file_name=nil)
   # Checks if .arcrc has hosts. If there are more than one host, shows message.
-  settings = get_arc_settings
+  settings = get_arc_settings settings_file_name
   if not settings.include? 'hosts'
     raise "ERROR: Your .arcrc file has no info about host or doesn't exists. Install arc and run install-certificate."
   elsif settings['hosts'].keys.length > 1
@@ -70,8 +70,8 @@ def get_phabricator_request_body(data={})
   }
 end
 
-def get_auth_kwargs(username)
-  settings = get_arc_settings
+def get_auth_kwargs(username, settings_file_name)
+  settings = get_arc_settings settings_file_name
   cert = settings['hosts'].values[0]['cert']
   token = "%.8f" % Time.now.to_f
   return {

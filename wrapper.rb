@@ -1,19 +1,19 @@
 # Phabricator Conduit API wrapper.
-# Before use make sure you have valid ~/.arcrc file.
 # Sample usage:
 # make_api_call method_address='diffusion.getcommits', data={"commits" => ["rPATc58eef262b497647bdec510c2ca2dcbd15f9d4e5"]}
 
 require_relative "helpers"
 
 
-def auth(username)
+def auth(username, settings_file_name)
   # Makes auth request, parses response and returns auth data.
-  settings = get_arc_settings
+  settings = get_arc_settings settings_file_name
   cert = settings['hosts'].values[0]['cert']
   token = "%.8f" % Time.now.to_f
-  kwargs = get_auth_kwargs username
+  kwargs = get_auth_kwargs username, settings_file_name
   data = get_phabricator_request_body kwargs
-  resp = make_phabricator_request 'conduit.connect', data
+  host = get_host_from_arc_settings settings_file_name
+  resp = make_phabricator_request 'conduit.connect', host, data
   return {
     '__conduit__' => {
       'sessionKey' => resp['result']['sessionKey'],
@@ -22,9 +22,8 @@ def auth(username)
   }
 end
 
-def make_phabricator_request(method_address, data={})
+def make_phabricator_request(method_address, host, data={})
   # Sends request to Phabricator API and parses response.
-  host = get_host_from_arc_settings
   headers = {
     'User-Agent' => 'ruby-phabricator/0.1',
     'Content-Type' => 'application/x-www-form-urlencoded',
@@ -33,12 +32,13 @@ def make_phabricator_request(method_address, data={})
   return JSON.parse response.body
 end
 
-def make_api_call(method_address, data={}, auth_data=nil)
+def make_api_call(method_address, settings_file_name, data={}, auth_data=nil)
   # Sends request to Phabricator API and parses response.
   # Makes auth request if no auth_data provided.
-  check_arc_settings
-  kwargs = auth_data || auth(get_username_from_arc_settings)
+  check_arc_settings settings_file_name
+  kwargs = auth_data || auth(get_username_from_arc_settings(settings_file_name), settings_file_name)
   kwargs.merge! data
   result_data = get_phabricator_request_body kwargs
-  return make_phabricator_request method_address, result_data
+  host = get_host_from_arc_settings settings_file_name
+  return make_phabricator_request method_address, host, result_data
 end
