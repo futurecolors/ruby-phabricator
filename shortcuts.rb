@@ -20,15 +20,18 @@ def get_commit_status project_sid, commit_ids, settings_file_name
   commit_phids[1].each{|e|
     s = e[0]
     p = e[1]
+    u = e[2]
+  result[s] = {}
+  result[s]['url'] = u
   if commit_statuses[p].nil?
-    result[s] = 'in_progress'
+    result[s]['status'] = 'in_progress'
   else
     if commit_statuses[p].include? 'accepted'
-	result[s] = 'accepted'
+	result[s]['status'] = 'accepted'
     elsif commit_statuses[p].include? 'concerned'
-	result[s] = 'conserned'
+	result[s]['status'] = 'conserned'
     else
-	result[s] = 'in_progress'
+	result[s]['status'] = 'in_progress'
    end
   end
   }
@@ -38,7 +41,7 @@ end
 
 def get_commit_phids(commit_sids, settings_file_name)
   res = make_api_call 'diffusion.getcommits', settings_file_name, data={"commits" => commit_sids}
-  return [res['result'].values.map{|v| v['commitPHID']}, res['result'].keys.map{|k| [k, res['result'][k]? res['result'][k]['commitPHID'] : 'no_phid'] }]
+  return [res['result'].values.map{|v| v['commitPHID']}, res['result'].keys.map{|k| [k, res['result'][k]? res['result'][k]['commitPHID'] : 'no_phid', res['result'][k]['uri']] }]
 end
 
 def get_commit_status_by_phids(commit_phids, settings_file_name)
