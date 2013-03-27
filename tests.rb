@@ -38,13 +38,16 @@ class FakeFSTestCase < Test::Unit::TestCase
 end
 
 
-class HelperFunctionsTest < FakeFSTestCase
+class FakeFSTestCaseWithHelpers < FakeFSTestCase
 
   def assert_raise_message(types, matcher, message = nil, &block)
     args = [types].flatten + [message]
     exception = assert_raise(*args, &block)
     assert_match matcher, exception.message, message
   end
+end
+
+class HelperFunctionsTest < FakeFSTestCaseWithHelpers
 
   def test_hash_generation_correct
     token = 'test_token'
@@ -129,7 +132,7 @@ class HelperFunctionsTest < FakeFSTestCase
 end
 
 
-class WrapperFunctionsTest < FakeFSTestCase
+class WrapperFunctionsTest < FakeFSTestCaseWithHelpers
   def test_make_api_call_makes_auth_call_then_call_to_correct_address
     host = 'http://test.phabricator.com/api/'
     api_method_name = 'conduit.ping'
@@ -139,9 +142,20 @@ class WrapperFunctionsTest < FakeFSTestCase
     stub_request(:post, "#{host}#{api_method_name}").to_return(:body => {'result'=>'OK', 'error_code'=>''}.to_json)  # call to api method
     make_api_call api_method_name, @settings_path
   end
+  def test_make_api_call_raises_exception_when_phabricator_returns_error
+    host = 'http://test.phabricator.com/api/'
+    api_method_name = 'conduit.ping'
+    create_settings_file "{\"hosts\":{\"#{host}\":{\"cert\":\"12345\"}}}"
+    auth_response_data = {'result' => {'sessionKey'=>'1', 'connectionID'=>'2'}, 'error_code'=>''}.to_json
+    stub_request(:post, "#{host}conduit.connect").to_return(:body => auth_response_data)  # auth request
+    stub_request(:post, "#{host}#{api_method_name}").to_return(:body => {'result'=>'', 'error_code'=>'WTF', 'error_info'=>'Something went wrong'}.to_json)  # call to api method with error
+    assert_raise_message RuntimeError, "Conduit method #{api_method_name} returned following error: WTF - Something went wrong." do
+      make_api_call api_method_name, @settings_path
+    end
+  end
 end
 
-class ShortcutsFunctionsTest < FakeFSTestCase
+class ShortcutsFunctionsTest < FakeFSTestCaseWithHelpers
   def test_get_commit_status
     host = 'http://test.phabricator.com/api/'
     create_settings_file "{\"hosts\":{\"#{host}\":{\"cert\":\"12345\"}}}"
@@ -154,4 +168,17 @@ class ShortcutsFunctionsTest < FakeFSTestCase
     statuses = get_commit_status 'PRJ', '12345', @settings_path
     assert statuses['rPRJ12345']['status'].eql? 'accepted'
   end
+  def test_get_commit_status_raises_no_exceptions
+    host = 'http://test.phabricator.com/api/'
+    create_settings_file "{\"hosts\":{\"#{host}\":{\"cert\":\"12345\"}}}"
+    auth_response_data = {'result' => {'sessionKey'=>'1', 'connectionID'=>'2'}, 'error_code'=>''}.to_json
+    getcommits_data = {'result' => {'rPRJ12345'=> {'commitPHID'=>'PHID12345'}}, 'error_code'=>''}.to_json
+    query_data = {'result' => '', 'error_code'=>'WTF', 'error_info'=>'Something went wrong'}.to_json
+    stub_request(:post, "#{host}conduit.connect").to_return(:body => auth_response_data)
+    stub_request(:post, "#{host}diffusion.getcommits").to_return(:body => getcommits_data)
+    stub_request(:post, "#{host}audit.query").to_return(:body => query_data)
+    statuses = get_commit_status 'PRJ', '12345', @settings_path
+    assert statuses.eql?({})
+  end
+
 end
