@@ -7,11 +7,6 @@ require 'json'
 
 options = {}
 
-#def get_commit_status project_sid, commit_ids, settings_file_name
-
-#puts get_commit_status 'belonika', ['95d8837efebaca7b8b6f860e4cb58fd6884af580', 'c17bf3cadfb6f562d770b0dd37bfa5fd6211f4df'], '/home/melevir/.arcrc'
-#puts get_commit_status 'BELONIKA', ['95d8837e', 'c17bf3ca'], '/home/melevir/.arcrc'
-puts get_commit_status 'BELONIKA', ['95d8837e', 'c17bf3ca'], '/home/melevir/fake_arcrc'
 
 optparse = OptionParser.new do |opts|
   opts.banner = "Usage: phabricator.rb [-d={...}] <API_METHOD_NAME>\n" +
