@@ -33,7 +33,7 @@ end
 def get_arc_settings(settings_file_name=nil)
   settings_file_name ||= File.expand_path "~/.arcrc"
   if not File.file? settings_file_name
-    raise 'No #{settings_file_name} file found'
+    raise "No #{settings_file_name} file found"
   end
   return JSON.parse(File.read settings_file_name)
 end

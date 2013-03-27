@@ -14,8 +14,8 @@ class FakeFSTestCase < Test::Unit::TestCase
 
   def create_settings_file(content)
     FileUtils.mkdir_p File.expand_path("~")
-    path = File.expand_path("~/.arcrc")
-    File.open(path, 'w') do |f|
+    @settings_path = File.expand_path("~/.arcrc")
+    File.open(@settings_path, 'w') do |f|
       f << content
     end
   end
@@ -86,9 +86,10 @@ class HelperFunctionsTest < FakeFSTestCase
     end
   end
 
-  def test_get_arc_settings_raises_error_when_no_file
-    assert_raise_message RuntimeError, 'No ~/.arcrc file found' do
-      get_arc_settings
+  def test_get_arc_settings_raises_error_when_wrong_file_passed
+    fake_settings_filename = '/home/user/fakerc'
+    assert_raise_message RuntimeError, "No #{fake_settings_filename} file found" do
+      get_arc_settings fake_settings_filename
     end
   end
 
@@ -133,10 +134,10 @@ class WrapperFunctionsTest < FakeFSTestCase
     host = 'http://test.phabricator.com/api/'
     api_method_name = 'conduit.ping'
     create_settings_file "{\"hosts\":{\"#{host}\":{\"cert\":\"12345\"}}}"
-    auth_response_data = {'result' => {'sessionKey'=>'1', 'connectionID'=>'2'}}.to_json
+    auth_response_data = {'result' => {'sessionKey'=>'1', 'connectionID'=>'2'}, 'error_code'=>''}.to_json
     stub_request(:post, "#{host}conduit.connect").to_return(:body => auth_response_data)  # auth request
-    stub_request(:post, "#{host}#{api_method_name}").to_return(:body => {'result'=>'OK'}.to_json)  # call to api method
-    make_api_call api_method_name
+    stub_request(:post, "#{host}#{api_method_name}").to_return(:body => {'result'=>'OK', 'error_code'=>''}.to_json)  # call to api method
+    make_api_call api_method_name, @settings_path
   end
 end
 
@@ -144,13 +145,13 @@ class ShortcutsFunctionsTest < FakeFSTestCase
   def test_get_commit_status
     host = 'http://test.phabricator.com/api/'
     create_settings_file "{\"hosts\":{\"#{host}\":{\"cert\":\"12345\"}}}"
-    auth_response_data = {'result' => {'sessionKey'=>'1', 'connectionID'=>'2'}}.to_json
-    getcommits_data = {'result' => {'rPRJ12345'=> {'commitPHID'=>'PHID12345'}}}.to_json
-    query_data = {'result' => [{'status' => 'accepted'}]}.to_json
+    auth_response_data = {'result' => {'sessionKey'=>'1', 'connectionID'=>'2'}, 'error_code'=>''}.to_json
+    getcommits_data = {'result' => {'rPRJ12345'=> {'commitPHID'=>'PHID12345'}}, 'error_code'=>''}.to_json
+    query_data = {'result' => [{'commitPHID' => 'PHID12345', 'status' => 'accepted'}], 'error_code'=>''}.to_json
     stub_request(:post, "#{host}conduit.connect").to_return(:body => auth_response_data)
     stub_request(:post, "#{host}diffusion.getcommits").to_return(:body => getcommits_data)
     stub_request(:post, "#{host}audit.query").to_return(:body => query_data)
-    status = get_commit_status 'PRJ', '12345'
-    assert status.eql? ['accepted',]
+    statuses = get_commit_status 'PRJ', '12345', @settings_path
+    assert statuses['rPRJ12345']['status'].eql? 'accepted'
   end
 end

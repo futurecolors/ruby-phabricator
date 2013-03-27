@@ -28,8 +28,12 @@ def make_phabricator_request(method_address, host, data={})
     'User-Agent' => 'ruby-phabricator/0.1',
     'Content-Type' => 'application/x-www-form-urlencoded',
   }
-  response =  make_post_request "#{host}#{method_address}", data, headers
-  return JSON.parse response.body
+  raw_response =  make_post_request "#{host}#{method_address}", data, headers
+  response = JSON.parse raw_response.body
+  if response and not response['error_code'].empty?
+    raise RuntimeError, "Conduit method #{method_address} returned following error: #{response['error_code']} - #{response['error_info']}"
+  end
+  return response
 end
 
 def make_api_call(method_address, settings_file_name, data={}, auth_data=nil)
