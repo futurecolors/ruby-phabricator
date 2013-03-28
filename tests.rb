@@ -184,7 +184,7 @@ class ShortcutsFunctionsTest < FakeFSTestCaseWithHelpers
     host = 'http://test.phabricator.com/api/'
     create_settings_file "{\"hosts\":{\"#{host}\":{\"cert\":\"12345\"}}}"
     auth_response_data = {'result' => {'sessionKey'=>'1', 'connectionID'=>'2'}, 'error_code'=>''}.to_json
-    getcommits_data = {'result' => {'rPRJ12345'=> {'commitPHID'=>'PHID12345'}, 'error_code'=>''}.to_json
+    getcommits_data = {'result' => {'rPRJ12345'=> {'commitPHID'=>'PHID12345'}}, 'error_code'=>''}.to_json
     query_data = {'result' => [{'commitPHID' => 'PHID67890', 'status' => 'accepted'}], 'error_code'=>''}.to_json
     stub_request(:post, "#{host}conduit.connect").to_return(:body => auth_response_data)
     stub_request(:post, "#{host}diffusion.getcommits").to_return(:body => getcommits_data)
