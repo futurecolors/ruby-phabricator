@@ -1,6 +1,6 @@
 # Turn on coveralls. Must be on top.
 require 'coveralls'
-Coveralls.wear!
+Coveralls.wear!('rails')
 
 require "test/unit"
 require 'webmock/test_unit'
