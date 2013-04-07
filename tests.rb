@@ -1,6 +1,6 @@
 # Turn on coveralls. Must be on top.
 require 'coveralls'
-Coveralls.wear!
+Coveralls.wear!('rails')
 
 require "test/unit"
 require 'webmock/test_unit'
@@ -195,6 +195,18 @@ class ShortcutsFunctionsTest < FakeFSTestCaseWithHelpers
     stub_request(:post, "#{@host}audit.query").to_return(:body => query_data)
     statuses = get_commit_status 'PRJ', '12345', @settings_path
     assert statuses.eql?({})
+  end
+  def test_get_commit_status_returns_in_progress_status_if_no_info_about_commit_status
+    host = 'http://test.phabricator.com/api/'
+    create_settings_file "{\"hosts\":{\"#{host}\":{\"cert\":\"12345\"}}}"
+    auth_response_data = {'result' => {'sessionKey'=>'1', 'connectionID'=>'2'}, 'error_code'=>''}.to_json
+    getcommits_data = {'result' => {'rPRJ12345'=> {'commitPHID'=>'PHID12345'}}, 'error_code'=>''}.to_json
+    query_data = {'result' => [{'commitPHID' => 'PHID67890', 'status' => 'accepted'}], 'error_code'=>''}.to_json
+    stub_request(:post, "#{host}conduit.connect").to_return(:body => auth_response_data)
+    stub_request(:post, "#{host}diffusion.getcommits").to_return(:body => getcommits_data)
+    stub_request(:post, "#{host}audit.query").to_return(:body => query_data)
+    statuses = get_commit_status 'PRJ', '12345', @settings_path
+    assert statuses['rPRJ12345']['status'].eql? 'in_progress'
   end
 
   def test_get_commit_status_by_phids_works_if_api_returned_multiple_info_about_commit
