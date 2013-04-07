@@ -80,3 +80,17 @@ def get_auth_kwargs(username, settings_file_name)
     'user' => username,
   }
 end
+
+def get_result_commit_status commit_statuses
+  if commit_statuses.nil?
+    return 'in_progress'
+  else
+    if commit_statuses.include? 'conserned'
+      return 'conserned'
+    elsif commit_statuses.include? 'accepted'
+      return 'accepted'
+    else
+      return 'in_progress'
+   end
+  end
+end
