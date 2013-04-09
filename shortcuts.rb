@@ -1,4 +1,5 @@
 require_relative "wrapper"
+require_relative "helpers"
 
 
 def get_commit_status project_sid, commit_ids, settings_file_name
@@ -32,17 +33,7 @@ def get_commit_status project_sid, commit_ids, settings_file_name
     u = e[2]
   result[s] = {}
   result[s]['url'] = u
-  if commit_statuses[p].nil?
-    result[s]['status'] = 'in_progress'
-  else
-    if commit_statuses[p].include? 'accepted'
-  result[s]['status'] = 'accepted'
-    elsif commit_statuses[p].include? 'concerned'
-  result[s]['status'] = 'concerned'
-    else
-  result[s]['status'] = 'in_progress'
-   end
-  end
+  result[s]['status'] = get_result_commit_status commit_statuses[p]
   }
   end
   return result

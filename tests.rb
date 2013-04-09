@@ -129,6 +129,20 @@ class HelperFunctionsTest < FakeFSTestCaseWithHelpers
     create_settings_file "{\"hosts\":{\"http://test_host.com\":{\"user\":\"#{username}\"}}}"
     assert get_username_from_arc_settings.eql? username
   end
+
+  def test_get_result_commit_status_returns_correct_data
+    test_data = {
+      nil => 'in_progress',
+      ['in_progress', ] => 'in_progress',
+      ['accepted', 'is_progress', ] => 'accepted',
+      ['conserned', 'in_progress', ] => 'conserned',
+      ['accepted', 'conserned', ] => 'conserned',
+    }
+    test_data.each{|input, expected_output|
+      actual_output = get_result_commit_status input
+      assert_equal actual_output, expected_output
+    }
+  end
 end
 
 
@@ -156,27 +170,29 @@ class WrapperFunctionsTest < FakeFSTestCaseWithHelpers
 end
 
 class ShortcutsFunctionsTest < FakeFSTestCaseWithHelpers
+  def setup
+    @host = 'http://test.phabricator.com/api/'
+  end
+
   def test_get_commit_status
-    host = 'http://test.phabricator.com/api/'
-    create_settings_file "{\"hosts\":{\"#{host}\":{\"cert\":\"12345\"}}}"
+    create_settings_file "{\"hosts\":{\"#{@host}\":{\"cert\":\"12345\"}}}"
     auth_response_data = {'result' => {'sessionKey'=>'1', 'connectionID'=>'2'}, 'error_code'=>''}.to_json
     getcommits_data = {'result' => {'rPRJ12345'=> {'commitPHID'=>'PHID12345'}}, 'error_code'=>''}.to_json
     query_data = {'result' => [{'commitPHID' => 'PHID12345', 'status' => 'accepted'}], 'error_code'=>''}.to_json
-    stub_request(:post, "#{host}conduit.connect").to_return(:body => auth_response_data)
-    stub_request(:post, "#{host}diffusion.getcommits").to_return(:body => getcommits_data)
-    stub_request(:post, "#{host}audit.query").to_return(:body => query_data)
+    stub_request(:post, "#{@host}conduit.connect").to_return(:body => auth_response_data)
+    stub_request(:post, "#{@host}diffusion.getcommits").to_return(:body => getcommits_data)
+    stub_request(:post, "#{@host}audit.query").to_return(:body => query_data)
     statuses = get_commit_status 'PRJ', '12345', @settings_path
     assert statuses['rPRJ12345']['status'].eql? 'accepted'
   end
   def test_get_commit_status_raises_no_exceptions
-    host = 'http://test.phabricator.com/api/'
-    create_settings_file "{\"hosts\":{\"#{host}\":{\"cert\":\"12345\"}}}"
+    create_settings_file "{\"hosts\":{\"#{@host}\":{\"cert\":\"12345\"}}}"
     auth_response_data = {'result' => {'sessionKey'=>'1', 'connectionID'=>'2'}, 'error_code'=>''}.to_json
     getcommits_data = {'result' => {'rPRJ12345'=> {'commitPHID'=>'PHID12345'}}, 'error_code'=>''}.to_json
     query_data = {'result' => '', 'error_code'=>'WTF', 'error_info'=>'Something went wrong'}.to_json
-    stub_request(:post, "#{host}conduit.connect").to_return(:body => auth_response_data)
-    stub_request(:post, "#{host}diffusion.getcommits").to_return(:body => getcommits_data)
-    stub_request(:post, "#{host}audit.query").to_return(:body => query_data)
+    stub_request(:post, "#{@host}conduit.connect").to_return(:body => auth_response_data)
+    stub_request(:post, "#{@host}diffusion.getcommits").to_return(:body => getcommits_data)
+    stub_request(:post, "#{@host}audit.query").to_return(:body => query_data)
     statuses = get_commit_status 'PRJ', '12345', @settings_path
     assert statuses.eql?({})
   end
@@ -193,4 +209,14 @@ class ShortcutsFunctionsTest < FakeFSTestCaseWithHelpers
     assert statuses['rPRJ12345']['status'].eql? 'in_progress'
   end
 
+  def test_get_commit_status_by_phids_works_if_api_returned_multiple_info_about_commit
+    commit_phid = 'PHID12345'
+    query_data = {'result' => [
+                                {'commitPHID' => commit_phid, 'status' => 'accepted'},
+                                {'commitPHID' => commit_phid, 'status' => 'concerned'},
+                              ], 'error_code'=>''}.to_json
+    stub_request(:post, "#{@host}audit.query").to_return(:body => query_data)
+    res = get_commit_status_by_phids commit_phid, @settings_path
+    assert_equal res, {commit_phid => ['accepted', 'concerned', ]}
+  end
 end
