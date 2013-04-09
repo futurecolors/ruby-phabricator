@@ -38,7 +38,7 @@ def get_commit_status project_sid, commit_ids, settings_file_name
     if commit_statuses[p].include? 'accepted'
   result[s]['status'] = 'accepted'
     elsif commit_statuses[p].include? 'concerned'
-  result[s]['status'] = 'conserned'
+  result[s]['status'] = 'concerned'
     else
   result[s]['status'] = 'in_progress'
    end
