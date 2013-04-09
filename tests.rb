@@ -135,8 +135,8 @@ class HelperFunctionsTest < FakeFSTestCaseWithHelpers
       nil => 'in_progress',
       ['in_progress', ] => 'in_progress',
       ['accepted', 'is_progress', ] => 'accepted',
-      ['conserned', 'in_progress', ] => 'conserned',
-      ['accepted', 'conserned', ] => 'conserned',
+      ['concerned', 'in_progress', ] => 'concerned',
+      ['accepted', 'concerned', ] => 'concerned',
     }
     test_data.each{|input, expected_output|
       actual_output = get_result_commit_status input

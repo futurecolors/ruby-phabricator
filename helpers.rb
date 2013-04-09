@@ -85,8 +85,8 @@ def get_result_commit_status commit_statuses
   if commit_statuses.nil?
     return 'in_progress'
   else
-    if commit_statuses.include? 'conserned'
-      return 'conserned'
+    if commit_statuses.include? 'concerned'
+      return 'concerned'
     elsif commit_statuses.include? 'accepted'
       return 'accepted'
     else
