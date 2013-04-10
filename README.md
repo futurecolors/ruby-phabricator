@@ -67,3 +67,4 @@ Usage:
 ## Todo
 
 * More shortcut functions
+* Wrap as gem
