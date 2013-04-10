@@ -66,5 +66,4 @@ Usage:
 
 ## Todo
 
-* Handling error messages from API.
 * More shortcut functions
