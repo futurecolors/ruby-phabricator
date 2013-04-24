@@ -25,15 +25,22 @@ def get_commit_status project_sid, commit_ids, settings_file_name
     }
     commit_statuses = nil
   end
+
+      puts 'pre b'
+    branches_info = get_commits_branches project_sid, commit_ids, settings_file_name
+    puts 'bbb', branches_info
+
+
   result = {}
   if not commit_statuses.nil?
   commit_phids[1].each{|e|
-    s = e[0]
+    s = e[0]  #FIXME: WTF? Make this clear
     p = e[1]
     u = e[2]
   result[s] = {}
   result[s]['url'] = u
   result[s]['status'] = get_result_commit_status commit_statuses[p]
+  result[s]['branches'] = branches_info[e]
   }
   end
   return result
@@ -41,7 +48,9 @@ end
 
 def get_commit_phids(commit_sids, settings_file_name)
   res = make_api_call 'diffusion.getcommits', settings_file_name, data={"commits" => commit_sids}
-  return [res['result'].values.map{|v| v['commitPHID']}, res['result'].keys.map{|k| [k, res['result'][k]? res['result'][k]['commitPHID'] : 'no_phid', res['result'][k]['uri']] }]
+  return [res['result'].values.map{|v| v['commitPHID']}, res['result'].keys.map{|k|
+            [k, res['result'][k]? res['result'][k]['commitPHID'] : 'no_phid', res['result'][k]['uri'], res['result'][k]['commitDetails']['seenOnBranches']]
+          }]
 
 end
 
@@ -60,5 +69,20 @@ end
 
 def get_commit_sids(project_sid, commit_ids)
   return commit_ids.map{|id| "r#{project_sid}#{id}"}
+end
+
+def get_commits_branches project_sid, commit_ids, settings_file_name
+  result = {}
+  commit_ids.each{|commit_id|
+    host = get_host_from_arc_settings settings_file_name
+    host = host[0, host.length - 4]  # stripping 'api/' suffix
+    branches_url = "#{host}diffusion/#{project_sid}/commit/#{commit_id}/branches/"
+    branches_response = make_post_request(branches_url).body
+    puts 'branches_response', branches_response
+    branches = get_branches_from_raw_data branches_response
+    commit_sid = get_commit_sids([commit_id])[0]
+    result[commit_sid] = branches
+  }
+  return result
 end
 

@@ -94,3 +94,10 @@ def get_result_commit_status commit_statuses
    end
   end
 end
+
+def get_branches_from_raw_data branchres_response
+  "Extracting branch names from phabricators commit/branches/ response"
+  raw_data = branchres_response.split('for (;;);')[1]
+  puts 'raw_data', raw_data
+  return JSON(raw_data)['payload'].scan(/>([^,]*?)</).flatten(1)
+end
