@@ -2,7 +2,7 @@ require_relative "wrapper"
 require_relative "helpers"
 
 
-def get_commit_status project_sid, commit_ids, settings_file_name
+def get_commit_status project_sid, commit_ids, settings_file_name, auth_data=nil
   # Gets statuses of commits in given projects.
   # commit_ids can be list or single id.
   # Sample usage:
@@ -17,19 +17,16 @@ def get_commit_status project_sid, commit_ids, settings_file_name
     commit_sids = get_commit_sids project_sid, commit_ids
     commit_phids = get_commit_phids commit_sids, settings_file_name
     commit_statuses = get_commit_status_by_phids commit_phids[0], settings_file_name
+    if not auth_data.nil?
+      branches_info = get_commits_branches project_sid, commit_ids, settings_file_name, auth_data['login'], auth_data['auth_cookie']
+    else
+      branches_info = nil
+    end
   rescue Exception => e
     # Do not throw exception if somethings went wrong - we're just helper plugin, isn't it?
-    puts e.message
-    JSON.parse(e.backtrace.inspect).each{|line|
-      puts line
-    }
+    print_exceprion_trace e
     commit_statuses = nil
   end
-
-      puts 'pre b'
-    branches_info = get_commits_branches project_sid, commit_ids, settings_file_name
-    puts 'bbb', branches_info
-
 
   result = {}
   if not commit_statuses.nil?
@@ -40,18 +37,24 @@ def get_commit_status project_sid, commit_ids, settings_file_name
   result[s] = {}
   result[s]['url'] = u
   result[s]['status'] = get_result_commit_status commit_statuses[p]
-  result[s]['branches'] = branches_info[e]
+  if not branches_info.nil?
+    result[s]['branches'] = branches_info[s]
+  end
   }
   end
   return result
 end
 
+def print_exceprion_trace e
+    puts e.message
+    JSON.parse(e.backtrace.inspect).each{|line| puts line }
+end
+
 def get_commit_phids(commit_sids, settings_file_name)
   res = make_api_call 'diffusion.getcommits', settings_file_name, data={"commits" => commit_sids}
   return [res['result'].values.map{|v| v['commitPHID']}, res['result'].keys.map{|k|
-            [k, res['result'][k]? res['result'][k]['commitPHID'] : 'no_phid', res['result'][k]['uri'], res['result'][k]['commitDetails']['seenOnBranches']]
+            [k, res['result'][k]? res['result'][k]['commitPHID'] : 'no_phid', res['result'][k]['uri']]
           }]
-
 end
 
 def get_commit_status_by_phids(commit_phids, settings_file_name)
@@ -71,16 +74,18 @@ def get_commit_sids(project_sid, commit_ids)
   return commit_ids.map{|id| "r#{project_sid}#{id}"}
 end
 
-def get_commits_branches project_sid, commit_ids, settings_file_name
+def get_commits_branches project_sid, commit_ids, settings_file_name, login, auth_cookie_value
   result = {}
+  headers = {
+    'Cookie' => "phusr=#{login}; phsid=#{auth_cookie_value}"
+  }
   commit_ids.each{|commit_id|
     host = get_host_from_arc_settings settings_file_name
     host = host[0, host.length - 4]  # stripping 'api/' suffix
     branches_url = "#{host}diffusion/#{project_sid}/commit/#{commit_id}/branches/"
-    branches_response = make_post_request(branches_url).body
-    puts 'branches_response', branches_response
+    branches_response = make_get_request(branches_url, {}, headers).body
     branches = get_branches_from_raw_data branches_response
-    commit_sid = get_commit_sids([commit_id])[0]
+    commit_sid = get_commit_sids(project_sid, [commit_id])[0]
     result[commit_sid] = branches
   }
   return result

@@ -16,6 +16,7 @@ def make_http_request(method, url, data={}, headers={})
     req.set_form_data data
   end
   req.basic_auth url.user, url.password
+
   res = Net::HTTP.start(url.host, url.port) {|http|
     http.request(req)
   }
@@ -98,6 +99,5 @@ end
 def get_branches_from_raw_data branchres_response
   "Extracting branch names from phabricators commit/branches/ response"
   raw_data = branchres_response.split('for (;;);')[1]
-  puts 'raw_data', raw_data
   return JSON(raw_data)['payload'].scan(/>([^,]*?)</).flatten(1)
 end
