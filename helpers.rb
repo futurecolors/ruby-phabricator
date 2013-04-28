@@ -99,5 +99,9 @@ end
 def get_branches_from_raw_data branchres_response
   "Extracting branch names from phabricators commit/branches/ response"
   raw_data = branchres_response.split('for (;;);')[1]
-  return JSON(raw_data)['payload'].scan(/>([^,]*?)</).flatten(1)
+  begin
+    return JSON(raw_data)['payload'].scan(/>([^,]*?)</).flatten(1)
+  rescue JSON::GeneratorError  # this happens when auth settings are incorrect and login page returned instead of JSON
+    return []
+  end
 end

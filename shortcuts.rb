@@ -2,14 +2,13 @@ require_relative "wrapper"
 require_relative "helpers"
 
 
-def get_commit_status project_sid, commit_ids, settings_file_name, auth_data=nil
+def get_commit_status project_sid, commit_ids, settings_file_name
   # Gets statuses of commits in given projects.
   # commit_ids can be list or single id.
   # Sample usage:
   #   get_commit_status 'PRJ', 'd26e6e20'
   #   get_commit_status 'PRJ', 'd26e6e20126006d60ce3cb2024f53330b8bc8329'
   #   get_commit_status 'PRJ', ['209a3ffa991169db6f273a3eedfb5f7ad735430b', 'd26e6e20126006d60ce3cb2024f53330b8bc8329']
-
   if not commit_ids.kind_of? Array
     commit_ids = [commit_ids]
   end
@@ -17,11 +16,6 @@ def get_commit_status project_sid, commit_ids, settings_file_name, auth_data=nil
     commit_sids = get_commit_sids project_sid, commit_ids
     commit_phids = get_commit_phids commit_sids, settings_file_name
     commit_statuses = get_commit_status_by_phids commit_phids[0], settings_file_name
-    if not auth_data.nil?
-      branches_info = get_commits_branches project_sid, commit_ids, settings_file_name, auth_data['login'], auth_data['auth_cookie']
-    else
-      branches_info = nil
-    end
   rescue Exception => e
     # Do not throw exception if somethings went wrong - we're just helper plugin, isn't it?
     print_exceprion_trace e
@@ -34,12 +28,9 @@ def get_commit_status project_sid, commit_ids, settings_file_name, auth_data=nil
     s = e[0]  #FIXME: WTF? Make this clear
     p = e[1]
     u = e[2]
-  result[s] = {}
-  result[s]['url'] = u
-  result[s]['status'] = get_result_commit_status commit_statuses[p]
-  if not branches_info.nil?
-    result[s]['branches'] = branches_info[s]
-  end
+    result[s] = {}
+    result[s]['url'] = u
+    result[s]['status'] = get_result_commit_status commit_statuses[p]
   }
   end
   return result
