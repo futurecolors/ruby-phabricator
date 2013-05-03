@@ -20,17 +20,17 @@ Phabricator API Wrapper for Ruby.
 
 In your code import `wrapper.rb` and use Phabricator API with `make_api_call` method. For example:
 ```ruby
-    commits = ["rPRJc58eef262b497647bdec510c2ca2dcbd15f9d4e5",]
-    commit_info = make_api_call 'diffusion.getcommits', {"commits" => commits}
-    commit_message = commit_info['result'].values[0]['commitMessage']
-    puts commit_message
+commits = ["rPRJc58eef262b497647bdec510c2ca2dcbd15f9d4e5",]
+commit_info = make_api_call 'diffusion.getcommits', {"commits" => commits}
+commit_message = commit_info['result'].values[0]['commitMessage']
+puts commit_message
 ```
 
 ### Using shortcuts
 
 Shortcuts are sets of commnds that covers most usual user cases.
 
-Now there is only one shortcut:
+Avalible shortcuts:
 
 #### get_commit_status
 
@@ -38,28 +38,51 @@ Returns statuses and phabricator urls of given commit.
 
 Usage:
 ```ruby
-    require 'ruby-phabricator/shortcuts.rb'
+require 'ruby-phabricator/shortcuts.rb'
 
-    project_sid = 'MYPRJ'  # Phabricator project slug
-    changesets = [
-        'de21b90bfac6cf0cf71593d5b2feca05131b1f88', 
-        'ebc0730753794f6266e94f3329d693adb71ab583'
-    ]  # commit's hashes, which statuses you need
-    arcrc_path = File.expand_path('./.arcrc')  # Path to .arcrc file
-    data = get_commit_status project_sid, changesets, arcrc_path
-    commit1_status = data['de21b90bfac6cf0cf71593d5b2feca05131b1f88']['status']  # string representation of commit's status, e.g. 'accepted' or 'concerned'
-    commit2_url = data['ebc0730753794f6266e94f3329d693adb71ab583']['url']  # url to phabricator's page of the commit
+project_sid = 'MYPRJ'  # Phabricator project slug
+changesets = [
+    'de21b90bfac6cf0cf71593d5b2feca05131b1f88', 
+    'ebc0730753794f6266e94f3329d693adb71ab583'
+]  # commit's hashes, which statuses you need
+arcrc_path = File.expand_path('./.arcrc')  # Path to .arcrc file
+
+data = get_commit_status project_sid, changesets, arcrc_path
+
+commit1_status = data['de21b90bfac6cf0cf71593d5b2feca05131b1f88']['status']  # string representation of commit's status, e.g. 'accepted' or 'concerned'
+commit2_url = data['ebc0730753794f6266e94f3329d693adb71ab583']['url']  # url to phabricator's page of the commit
+```
+
+#### get_commits_branches
+
+Returns list of branches, that contain specified commit. This can't be done with Conduit, so the info is extracted from direct request to Phabricator page.
+It can be rather slow and requires additional auth data (username and cookie value):
+```ruby
+require 'ruby-phabricator/shortcuts.rb'
+
+project_sid = 'MYPRJ'  # Phabricator project slug
+changesets = [
+    'de21b90bfac6cf0cf71593d5b2feca05131b1f88', 
+    'ebc0730753794f6266e94f3329d693adb71ab583'
+]  # commit's hashes, which branches you need
+arcrc_path = File.expand_path('./.arcrc')  # Path to .arcrc file
+login = 'John'
+auth_cookie = 'some_long_auth_hash'
+
+branches = get_commits_branches project_sid, changesets, arcrc_path, login, auth_cookie_value
+
+commit1_branches = branches['de21b90bfac6cf0cf71593d5b2feca05131b1f88']  # list of branches names
 ```
 
 ## In bash
 
 `phabricator.rb` provides command-line interface to `make_api_call` method. Sample usage:
 ```
-    $ cd /somewhere/ruby-phabricator/
-    $ ruby ./phabricator.rb conduit.ping
-    {"result"=>"dev", "error_code"=>nil, "error_info"=>nil}
-    $ ruby ./phabricator.rb --data='{"name": "PRJ"}' arcanist.projectinfo
-    {"result"=>nil, "error_code"=>"ERR-BAD-ARCANIST-PROJECT", "error_info"=>"No such project exists."}
+$ cd /somewhere/ruby-phabricator/
+$ ruby ./phabricator.rb conduit.ping
+{"result"=>"dev", "error_code"=>nil, "error_info"=>nil}
+$ ruby ./phabricator.rb --data='{"name": "PRJ"}' arcanist.projectinfo
+{"result"=>nil, "error_code"=>"ERR-BAD-ARCANIST-PROJECT", "error_info"=>"No such project exists."}
 ```
 
 # For contributors
