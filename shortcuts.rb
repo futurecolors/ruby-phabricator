@@ -85,5 +85,6 @@ end
 def get_base_repositiry_url project_sid, settings_file_name
   host = get_host_from_arc_settings settings_file_name
   host = host[0, host.length - 4]  # stripping 'api/' suffix
+  host = remove_basic_auth_if_present host  # keep secrets secret
   return "#{host}diffusion/#{project_sid}/browse/"
 end

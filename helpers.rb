@@ -105,3 +105,10 @@ def get_branches_from_raw_data branchres_response
     return []
   end
 end
+
+def remove_basic_auth_if_present url
+  url = URI.parse url
+  url.user = nil
+  url.password = nil
+  return url.to_s
+end
