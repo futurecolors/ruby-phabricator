@@ -17,10 +17,9 @@ def make_http_request(method, url, data={}, headers={})
   end
   req.basic_auth url.user, url.password
 
-  res = Net::HTTP.start(url.host, url.port) {|http|
-    http.request(req)
-  }
-  return res
+  http = Net::HTTP.new(url.host, url.port)
+  http.use_ssl = true if url.scheme == 'https'
+  return http.request(req)
 end
 
 def make_get_request(url, data={}, headers={})
